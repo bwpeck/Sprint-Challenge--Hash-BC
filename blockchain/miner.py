@@ -18,13 +18,18 @@ def proof_of_work(last_proof):
     - IE:  last_hash: ...AE9123456, new hash 123456888...
     - p is the previous proof, and p' is the new proof
     - Use the same method to generate SHA-256 hashes as the examples in class
+    - Note:  We are adding the hash of the last proof to a number/nonce for the new proof
     """
 
     start = timer()
 
     print("Searching for next proof")
-    proof = 0
+    proof = 1
     #  TODO: Your code here
+    # last_proof_string = f'{last_proof}'.encode()
+    # last_proof_hash = hashlib.sha256(last_proof_string).hexdigest()
+    while valid_proof(last_proof, proof) is False:
+        proof += 1
 
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
     return proof
@@ -33,14 +38,16 @@ def proof_of_work(last_proof):
 def valid_proof(last_hash, proof):
     """
     Validates the Proof:  Multi-ouroborus:  Do the last six characters of
-    the hash of the last proof match the first six characters of the hash
-    of the new proof?
-
-    IE:  last_hash: ...AE9123456, new hash 123456E88...
+    the hash of the last proof match the first six characters of the proof?
+    IE:  last_hash: ...AE9123456, new hash 123456888...
     """
 
     # TODO: Your code here!
-    pass
+    last_proof_string = f'{last_hash}'.encode()
+    last_proof_hash = hashlib.sha256(last_proof_string).hexdigest()
+    guess = f'{proof}'.encode()
+    guess_hash = hashlib.sha256(guess).hexdigest()
+    return guess_hash[:6] == last_proof_hash[-6:]
 
 
 if __name__ == '__main__':
@@ -53,7 +60,7 @@ if __name__ == '__main__':
     coins_mined = 0
 
     # Load or create ID
-    f = open("my_id.txt", "r")
+    f = open("/Users/benjaminwade/Documents/Git/Sprint-Challenge--Hash-BC/blockchain/my_id.txt", "r")
     id = f.read()
     print("ID is", id)
     f.close()
@@ -73,7 +80,7 @@ if __name__ == '__main__':
 
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
-        if data.get('message') == 'New Block Forged':
+        if data.get('message') == None:
             coins_mined += 1
             print("Total coins mined: " + str(coins_mined))
         else:
